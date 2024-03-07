@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://b0prjvo8e34g1"]
+
+[ext_resource type="Script" path="res://mino_renderer.gd" id="1_2wph1"]
+
+[node name="MinoRenderer" type="Node3D"]
+script = ExtResource("1_2wph1")

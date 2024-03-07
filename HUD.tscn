@@ -1,0 +1,14 @@
+[gd_scene load_steps=2 format=3 uid="uid://doc4yg4b8ya3a"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_78hl1"]
+font_size = 48
+
+[node name="HUD" type="CanvasLayer"]
+
+[node name="Label" type="Label" parent="."]
+offset_right = 294.0
+offset_bottom = 329.0
+text = "Next Pieces : 
+"
+label_settings = SubResource("LabelSettings_78hl1")
+horizontal_alignment = 1

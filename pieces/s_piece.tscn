@@ -1,0 +1,18 @@
+[gd_scene load_steps=3 format=3 uid="uid://k4raiefeb8ok"]
+
+[ext_resource type="Script" path="res://pieces/s_piece.gd" id="1_d47y7"]
+[ext_resource type="PackedScene" uid="uid://builx17aylpic" path="res://mino.tscn" id="2_o2ijg"]
+
+[node name="S piece" type="Node3D"]
+script = ExtResource("1_d47y7")
+
+[node name="Mino0" parent="." instance=ExtResource("2_o2ijg")]
+
+[node name="Mino1" parent="." instance=ExtResource("2_o2ijg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+
+[node name="Mino2" parent="." instance=ExtResource("2_o2ijg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0, 0)
+
+[node name="Mino3" parent="." instance=ExtResource("2_o2ijg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0)
