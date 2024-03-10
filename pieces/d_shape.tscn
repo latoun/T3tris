@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://mnive5nmtteo"]
+
+[ext_resource type="Script" path="res://pieces/d_shape.gd" id="1_n406v"]
+
+[node name="D shape" type="Node3D"]
+script = ExtResource("1_n406v")

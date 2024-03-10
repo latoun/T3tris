@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://dp4t2elqcoy2t"]
+
+[ext_resource type="Script" path="res://pieces/o_shape.gd" id="1_rpq4o"]
+
+[node name="O shape" type="Node3D"]
+script = ExtResource("1_rpq4o")

@@ -1,0 +1,39 @@
+[gd_scene load_steps=6 format=3 uid="uid://bpyua2i6mjicw"]
+
+[ext_resource type="Script" path="res://Minoes.gd" id="1_wfcqn"]
+[ext_resource type="PackedScene" uid="uid://doc4yg4b8ya3a" path="res://HUD.tscn" id="2_8qbh6"]
+[ext_resource type="Script" path="res://Control.gd" id="3_23bif"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_8fmjv"]
+albedo_color = Color(0.756863, 0.756863, 0.756863, 1)
+metallic = 1.0
+
+[sub_resource type="QuadMesh" id="QuadMesh_75atd"]
+material = SubResource("StandardMaterial3D_8fmjv")
+size = Vector2(5, 5)
+orientation = 1
+
+[node name="Main" type="Node3D"]
+
+[node name="Render" type="Node3D" parent="."]
+
+[node name="Grid floor" type="MeshInstance3D" parent="Render"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+mesh = SubResource("QuadMesh_75atd")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(0.707107, -0.454519, 0.541675, 0, 0.766044, 0.642788, -0.707107, -0.454519, 0.541675, 8, 15, 8)
+size = 20.0
+
+[node name="Minoes" type="Node3D" parent="."]
+script = ExtResource("1_wfcqn")
+
+[node name="Control" type="Node3D" parent="."]
+script = ExtResource("3_23bif")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.707107, 0.454519, -0.541675, 0, 0.766045, 0.642787, 0.707107, -0.454519, 0.541675, -4.00595, 14.0255, 8.13791)
+light_energy = 3.0
+sky_mode = 1
+
+[node name="HUD" parent="." instance=ExtResource("2_8qbh6")]

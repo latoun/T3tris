@@ -1,37 +1,48 @@
 [gd_scene load_steps=5 format=3 uid="uid://bpyua2i6mjicw"]
 
+[ext_resource type="Script" path="res://Minoes.gd" id="1_wfcqn"]
 [ext_resource type="PackedScene" uid="uid://doc4yg4b8ya3a" path="res://HUD.tscn" id="2_8qbh6"]
+[ext_resource type="Script" path="res://GridRender.gd" id="2_yls2j"]
 [ext_resource type="Script" path="res://Control.gd" id="3_23bif"]
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_8fmjv"]
-albedo_color = Color(0, 0, 0, 1)
-metallic = 1.0
-
-[sub_resource type="QuadMesh" id="QuadMesh_75atd"]
-material = SubResource("StandardMaterial3D_8fmjv")
-size = Vector2(5, 5)
-orientation = 1
 
 [node name="Main" type="Node3D"]
 
-[node name="Render" type="Node3D" parent="."]
+[node name="Grid" type="Node3D" parent="."]
 
-[node name="Grid floor" type="MeshInstance3D" parent="Render"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
-mesh = SubResource("QuadMesh_75atd")
+[node name="Minoes" type="Node3D" parent="Grid"]
+script = ExtResource("1_wfcqn")
 
-[node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(0.707107, -0.454519, 0.541675, 0, 0.766044, 0.642788, -0.707107, -0.454519, 0.541675, 8, 15, 8)
-size = 20.0
-
-[node name="Minoes" type="Node3D" parent="."]
-
-[node name="Control" type="Node3D" parent="."]
-script = ExtResource("3_23bif")
-
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
-transform = Transform3D(0.707107, 0.454519, -0.541675, 0, 0.766045, 0.642787, 0.707107, -0.454519, 0.541675, -4.00595, 14.0255, 8.13791)
-light_energy = 3.0
-sky_mode = 1
+[node name="GridRender" type="Node3D" parent="Grid"]
+script = ExtResource("2_yls2j")
 
 [node name="HUD" parent="." instance=ExtResource("2_8qbh6")]
+
+[node name="Control" type="Node3D" parent="." node_paths=PackedStringArray("HUD", "MinoesRender", "GridNode")]
+script = ExtResource("3_23bif")
+HUD = NodePath("../HUD")
+MinoesRender = NodePath("../Grid/Minoes")
+GridNode = NodePath("../Grid")
+
+[node name="Pivot" type="Node3D" parent="."]
+transform = Transform3D(0.726515, -0.43309, 0.533488, 0, 0.776376, 0.630269, -0.687151, -0.4579, 0.564049, 0, 8, 0)
+
+[node name="Camera3D" type="Camera3D" parent="Pivot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 15)
+
+[node name="OmniLight3D" type="OmniLight3D" parent="Pivot/Camera3D"]
+omni_range = 40.0
+omni_attenuation = 0.15932
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.939693, 0.34202, 0, -0.34202, 0.939693, 0, 0, 20)
+light_energy = 0.1
+light_indirect_energy = 0.1
+light_volumetric_fog_energy = 0.1
+shadow_enabled = true
+
+[node name="DirectionalLight3D2" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-4.37114e-08, -0.34202, 0.939693, 0, 0.939693, 0.34202, -1, 1.49502e-08, -4.10753e-08, 20, 0, 0)
+light_energy = 0.1
+light_indirect_energy = 0.1
+light_volumetric_fog_energy = 0.1
+shadow_enabled = true

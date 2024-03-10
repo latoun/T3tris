@@ -1,0 +1,17 @@
+[gd_scene load_steps=3 format=3 uid="uid://ddns4uwt8df0j"]
+
+[ext_resource type="Script" path="res://piece.gd" id="1_pxhwh"]
+[ext_resource type="PackedScene" uid="uid://builx17aylpic" path="res://mino.tscn" id="2_lp1ac"]
+
+[node name="Piece" type="Node3D"]
+script = ExtResource("1_pxhwh")
+
+[node name="Minoes" type="Node3D" parent="."]
+
+[node name="Mino0" parent="Minoes" instance=ExtResource("2_lp1ac")]
+
+[node name="Mino1" parent="Minoes" instance=ExtResource("2_lp1ac")]
+
+[node name="Mino2" parent="Minoes" instance=ExtResource("2_lp1ac")]
+
+[node name="Mino3" parent="Minoes" instance=ExtResource("2_lp1ac")]

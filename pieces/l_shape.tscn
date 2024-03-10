@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://sw1532hyijl4"]
+
+[ext_resource type="Script" path="res://pieces/l_shape.gd" id="1_fv3dc"]
+
+[node name="L shape" type="Node3D"]
+script = ExtResource("1_fv3dc")

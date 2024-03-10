@@ -2,29 +2,36 @@ extends Node3D
 
 var time_elapsed = 0
 var grid = []
-var size = [5,20,5]
+var size
 var current_piece = [2,12,2]
 var queue = []
-var HUD
+var piece
 
+@export var HUD : CanvasLayer
+@export var MinoesRender : Node
+@export var GridNode : Node
 
 const speed = 2
-const piece_scene = [
-	preload("res://pieces/b_piece.tscn"),
-	preload("res://pieces/d_piece.tscn"),
-	preload("res://pieces/f_piece.tscn"),
-	preload("res://pieces/i_piece.tscn"),
-	preload("res://pieces/l_piece.tscn"),
-	preload("res://pieces/o_piece.tscn"),
-	preload("res://pieces/s_piece.tscn"),
-	preload("res://pieces/t_piece.tscn"),
+const preload_piece = preload("res://piece.tscn")
+
+var shapes = [
+	preload("res://pieces/b_shape.tscn"),
+	preload("res://pieces/d_shape.tscn"),
+	preload("res://pieces/f_shape.tscn"),
+	preload("res://pieces/i_shape.tscn"),
+	preload("res://pieces/l_shape.tscn"),
+	preload("res://pieces/o_shape.tscn"),
+	preload("res://pieces/s_shape.tscn"),
+	preload("res://pieces/t_shape.tscn"),
 ]
 
 var letters = ['b', 'd', 'f', 'i', 'l', 'o', 's', 't']
 
 func _ready():
 	HUD = get_parent().find_child('HUD')
+	size = MinoesRender.size
 	init_grid()
+	MinoesRender.generate_mino_nodes()
 	queue = [0,1,2,3,4,5,6,7]
 	queue.shuffle()
 	var queuetmp = [0,1,2,3,4,5,6,7]
@@ -33,52 +40,44 @@ func _ready():
 	spawn_new_piece()
 
 func _process(delta):
-	for piece in self.get_children():
-		if Input.is_action_just_pressed('move_left'):
-			move_piece(piece,[-1,0,0])
-		if Input.is_action_just_pressed('move_right'):
-			move_piece(piece,[1,0,0])
-		if Input.is_action_just_pressed('move_backward'):
-			move_piece(piece,[0,0,1])
-		if Input.is_action_just_pressed('move_forward'):
-			move_piece(piece,[0,0,-1])
-		if Input.is_action_just_pressed('rot_x_cw'):
-			rotate_piece(piece,[1,0,0])
-		if Input.is_action_just_pressed('rot_x_ccw'):
-			rotate_piece(piece,[-1,0,0])
-		if Input.is_action_just_pressed('rot_y_cw'):
-			rotate_piece(piece,[0,1,0])
-		if Input.is_action_just_pressed('rot_y_ccw'):
-			rotate_piece(piece,[0,-1,0])
-		if Input.is_action_just_pressed('rot_z_cw'):
-			rotate_piece(piece,[0,0,1])
-		if Input.is_action_just_pressed('rot_z_ccw'):
-			rotate_piece(piece,[0,0,-1])
-		if Input.is_action_just_pressed('hard_drop'):
-			while move_piece(piece,[0,-1,0]):
-				pass
-			add_to_grid(piece)
-			self.remove_child(piece)
-			for mino in piece.get_children():
-				piece.remove_child(mino)
-				mino.translate(Vector3(current_piece[0] -2, current_piece[1], current_piece[2] - 2))
-				get_parent().find_child("Minoes").add_child(mino)
+	if Input.is_action_just_pressed('move_left'):
+		attempt_move([-1,0,0])
+	if Input.is_action_just_pressed('move_right'):
+		attempt_move([1,0,0])
+	if Input.is_action_just_pressed('move_backward'):
+		attempt_move([0,0,1])
+	if Input.is_action_just_pressed('move_forward'):
+		attempt_move([0,0,-1])
+	if Input.is_action_just_pressed('rot_x_cw'):
+		attempt_rotation([1,0,0])
+	if Input.is_action_just_pressed('rot_x_ccw'):
+		attempt_rotation([-1,0,0])
+	if Input.is_action_just_pressed('rot_y_cw'):
+		attempt_rotation([0,1,0])
+	if Input.is_action_just_pressed('rot_y_ccw'):
+		attempt_rotation([0,-1,0])
+	if Input.is_action_just_pressed('rot_z_cw'):
+		attempt_rotation([0,0,1])
+	if Input.is_action_just_pressed('rot_z_ccw'):
+		attempt_rotation([0,0,-1])
+	if Input.is_action_just_pressed('hard_drop'):
+		while attempt_move([0,-1,0]):
+			pass
+		time_elapsed = speed
+	if Input.is_action_pressed('soft_drop'):
+		delta *= 10
+	
+	#Natural fall gestion
+	time_elapsed += delta
+	while time_elapsed >= speed:
+		time_elapsed -= speed
+		if not attempt_move([0,-1,0]):
+			add_to_grid()
+			update_grid_render()
+			GridNode.remove_child(piece)
 			piece.queue_free()
+			check_line_clears()
 			spawn_new_piece()
-		if Input.is_action_pressed('soft_drop'):
-			delta *= 10
-		time_elapsed += delta
-		while time_elapsed > speed:
-			time_elapsed -= speed
-			if not move_piece(piece,[0,-1,0]):
-				add_to_grid(piece)
-				self.remove_child(piece)
-				for mino in piece.get_children():
-					piece.remove_child(mino)
-					mino.translate(Vector3(current_piece[0] -2, current_piece[1], current_piece[2] - 2))
-					get_parent().find_child("Minoes").add_child(mino)
-				piece.queue_free()
-				spawn_new_piece()
 
 func init_grid():
 	grid.resize(size[0])
@@ -92,46 +91,28 @@ func init_grid():
 			grid[gx][gy].resize(size[2])
 			grid[gx][gy].fill(0)
 
-func move_piece(piece, d):
-	var minoes = piece.minoes
-	if not check_position(minoes, array_add(current_piece, d)):
+func attempt_move(d):
+	if not piece.is_valid_move(grid, d):
 		return false
-	current_piece = array_add(current_piece, d)
-	piece.translate(Vector3(d[0], d[1], d[2]))
-	return true
-	
-func check_position(minoes, piece_pos):
-	for mino in minoes:
-		for i in range(3):
-			var tmp = mino[i] + piece_pos[i]
-			if not (0 <= tmp and tmp < size[i]) :
-				return false
-		var pos = array_add(mino, piece_pos)
-		if grid[pos[0]][pos[1]][pos[2]] == 1:
-			return false
+	piece.move_piece(d)
+	piece.update_render()
+	time_elapsed = 0
 	return true
 
-func rotate_piece(piece,rot):
-	piece.rotate_minoes(rot)
-	var minoes = piece.minoes
-	var kicks = piece.get_kicks(rot)
-	for kick in kicks:
-		var pos = array_add(kick, current_piece)
-		if check_position(minoes, pos):
-			piece.update_kicks(rot)
-			piece.update_render()
-			piece.translate(Vector3(kick[0], kick[1], kick[2]))
-			current_piece = pos
-			return true
-	var inverse_rot = [-rot[0], -rot[1], -rot[2]]
-	piece.rotate_minoes(inverse_rot)
-	return false
-	
-func add_to_grid(piece):
-	var minoes = piece.minoes
+func attempt_rotation(d):
+	var kick = piece.is_valid_rotation(grid, d)
+	if not kick:
+		return false
+	piece.rotate_piece(d, kick)
+	piece.update_render()
+	time_elapsed = 0
+	return true
+
+func add_to_grid():
+	var minoes = piece.MinoShape.minoes
 	for mino in minoes:
-		var pos = array_add(mino, current_piece)
-		grid[pos[0]][pos[1]][pos[2]] = 1
+		var mino_pos = array_add(mino, piece.pos)
+		grid[mino_pos[0]][mino_pos[1]][mino_pos[2]] = 1
 
 func array_add(a, b):
 	var res = []
@@ -141,7 +122,10 @@ func array_add(a, b):
 
 func spawn_new_piece():
 	var piece_type = queue.pop_front()
-	var new_piece = piece_scene[piece_type].instantiate()
+	piece = preload_piece.instantiate()
+	var shape = shapes[piece_type].instantiate()
+	piece.MinoShape = shape
+	piece.add_child(shape)
 	if len(queue) == 8:
 		var queuetmp = [0,1,2,3,4,5,6,7]
 		queuetmp.shuffle()
@@ -149,13 +133,11 @@ func spawn_new_piece():
 	HUD.find_child('Label').text = "Next Pieces :\n"
 	for i in range(6):
 		HUD.find_child('Label').text += letters[queue[i]] + "\n"
-	new_piece.position.y = 12
-	self.add_child(new_piece)
-	current_piece = [2,12,2]
+	piece.pos = [2,12,2]
 	time_elapsed = 0
-	check_line_clears()
-	
-	
+	GridNode.add_child(piece)
+	piece.init_render()
+
 func check_line_clears():
 	for y in range(size[1] - 1, -1, -1):
 		var clear = true
@@ -168,11 +150,22 @@ func check_line_clears():
 				for yy in range(y + 1, size[1]):
 					for z in range(size[2]):
 						grid[x][yy - 1][z] = grid[x][yy][z]
-			var Minoes = get_parent().find_child('Minoes')
-			for mino in Minoes.get_children():
-				if  y - 0.5 < mino.position.y and mino.position.y < y + 0.5:
-					Minoes.remove_child(mino)
-					mino.queue_free()
-					continue
-				if  mino.position.y > y + 0.5:
-					mino.translate(Vector3(0,-1,0))
+						transfer_mino_state(x, yy - 1, z)
+
+func update_grid_render():
+	var minoes = piece.MinoShape.minoes
+	for mino in minoes:
+		var mino_pos = array_add(mino, piece.pos)
+		var mino_name =  "%s %s %s" % mino_pos
+		var MinoNode = MinoesRender.find_child(mino_name, true, false)
+		MinoNode.visible = true
+		var mat = MinoNode.get_child(0).get_surface_override_material(0).duplicate()
+		mat.albedo_color = Color(piece.MinoShape.color)
+		MinoNode.get_child(0).set_surface_override_material(0, mat)
+
+func transfer_mino_state(x,y,z):
+	var low_mino = MinoesRender.find_child("%s %s %s" % [x,y,z], true, false)
+	var high_mino = MinoesRender.find_child("%s %s %s" % [x,y + 1,z], true, false)
+	low_mino.visible = high_mino.visible
+	low_mino.get_child(0).set_surface_override_material(0, high_mino.get_child(0).get_surface_override_material(0))
+	
